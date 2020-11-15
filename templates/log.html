@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log
+{% endblock %}
+
+{% block main %}
+<form action="/log" method="post">
+    <div class="form-group">
+        <select name="habit" class="form-control">
+                {% for i in range(habit_list|length) %}
+                <option>{{ habit_list[i][0] }}</option>
+                 {% endfor %}
+        </select>
+        <br>
+        <input autocomplete="off" autofocus class="form-control" name="rating" placeholder="Rating" type="number">
+    </div>
+    <button class="btn btn-primary" type="submit">Log</button>
+</form>
+{% endblock %}
