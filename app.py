@@ -11,9 +11,10 @@ from flask_session import Session
 from datetime import datetime
 import sqlite3
 
-TODAY = datetime.today().strftime('%Y-%m-%d')
+TODAY = str(datetime.today().strftime('%Y-%m-%d'))
 print(TODAY)
 RECORD = False
+
 
 # add column to users that stores dictionary with habits and types
 
@@ -21,7 +22,7 @@ RECORD = False
 import sqlite3
 db = sqlite3.connect('database.db')
 #db.execute('DROP TABLE habits')
-#db.execute('CREATE TABLE habits (habit_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, habit TEXT, rating INTEGER, date TEXT)')
+#db.execute('CREATE TABLE habitlist (habit_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, habit TEXT, type TEXT)')
 
 
 # Ensure templates are auto-reloaded
@@ -40,28 +41,23 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Log new habit
 @app.route('/log', methods=["GET", "POST"])
 @login_required
 def log():
     connection = sqlite3.connect('database.db')
     db = connection.cursor()
-    habit_list = list(db.execute("SELECT habit from habits WHERE user_id = ?", (session["user_id"],)))
-    
-    habit = request.form.get("habit")
-    rating = request.form.get("rating")
+    habit_list = list(set(list(db.execute("SELECT habit from habitlist WHERE user_id = ?", (session["user_id"],)))))
+   
+    if request.method == "POST":
+        habit = request.form.get("habit")
+        rating = request.form.get("rating")
+        db.execute('INSERT INTO habits(user_id,habit,rating, date) VALUES(?,?,?,?)', (session["user_id"], habit, rating, TODAY))
+        connection.commit()
+        connection.close()
 
-
-    db.execute('INSERT INTO habits(user_id,habit,rating, date) VALUES(?,?,?,?)', (session["user_id"], "habit", rating, '2020-11-15'))
-    connection.commit()
-    connection.close()
-    
     return render_template("log.html", habit_list = habit_list)
 
-
-@app.route('/')
-@login_required
-def index():
-    return render_template("index.html")
 
 @app.route('/new', methods=["GET", "POST"])
 @login_required
@@ -74,11 +70,26 @@ def new():
         habit_type = request.form.get("type")
 
 
-        db.execute('INSERT INTO habits(user_id,habit) VALUES(?,?)', (session["user_id"], habit))
+        db.execute('INSERT INTO habitlist(user_id,habit,type) VALUES(?,?,?)', (session["user_id"], habit, habit_type))
         connection.commit()
-        connection.close()
+        #onnection.close()
 
     return render_template("new.html")
+
+@app.route('/delete')
+@login_required
+def delete():
+    return render_template("delete.html")
+
+@app.route('/history')
+@login_required
+def history():
+    return render_template("history.html")
+
+@app.route('/')
+@login_required
+def index():
+    return render_template("index.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -176,3 +187,4 @@ def logout():
 
 
     #git push -u origin main
+    # git push origin HEAD:master
