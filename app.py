@@ -1,7 +1,7 @@
 from flask import Flask
 app = Flask(__name__)
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, json
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -84,7 +84,26 @@ def delete():
 @app.route('/history')
 @login_required
 def history():
-    return render_template("history.html")
+    connection = sqlite3.connect('database.db')
+    db = connection.cursor()
+    data_dict = {}
+    habit_list = list(set(list(db.execute("SELECT habit from habitlist WHERE user_id = ?", (session["user_id"],)))))
+    for h in habit_list:
+        # need data
+        data_list = list(db.execute("SELECT rating from habits WHERE user_id = ? AND habit = ?", (session["user_id"], h[0])))
+        
+        if data_list != []:
+            print(h[0], [i[0] for i in data_list])
+            #print(list(data_list[0]))
+            data_dict[h[0]] = [i[0] for i in data_list]
+    #print(data_dict['Anna'])
+    connection.commit()
+    connection.close()
+
+    dates = [1,2,3,4]
+
+
+    return render_template("history.html", data_dict = data_dict)
 
 @app.route('/')
 @login_required
