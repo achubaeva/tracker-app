@@ -23,8 +23,6 @@ import sqlite3
 db = sqlite3.connect('database.db')
 #db.execute('DROP TABLE habits')
 #db.execute('CREATE TABLE habitlist (habit_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, habit TEXT, type TEXT)')
-
-
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -58,7 +56,7 @@ def log():
 
     return render_template("log.html", habit_list = habit_list)
 
-
+# Add new habit
 @app.route('/new', methods=["GET", "POST"])
 @login_required
 def new():
@@ -76,6 +74,7 @@ def new():
 
     return render_template("new.html")
 
+# Delete current habit
 @app.route('/delete', methods=["GET", "POST"])
 @login_required
 def delete():
@@ -101,6 +100,7 @@ def delete():
     else:
         return render_template("delete.html", habit_list = habit_list)
 
+# Homepage - show dashboard
 @app.route('/')
 @login_required
 def index():
@@ -117,17 +117,19 @@ def index():
             #print(list(data_list[0]))
             data_dict[h[0]] = [i[0] for i in data_list]
     #print(data_dict['Anna'])
+    
+
+    # dates
+    dates_set = list(set(list(db.execute("SELECT date from habits WHERE user_id = ?", (session["user_id"],)))))
     connection.commit()
     connection.close()
-
-    dates = [1,2,3,4]
-
     #data = [1.0,2.0,3.0] 
     #print("Data is", data)
+    dates = [i[0] for i in dates_set]
 
+    return render_template("index.html.j2", data=json.dumps(data_dict), habit_list=habit_list, dates=dates)
 
-    return render_template("index.html.j2", data=json.dumps(data_dict), habit_list = habit_list)
-
+#Register as a new user
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
@@ -165,7 +167,7 @@ def register():
     else:
         return render_template("register.html")
 
-
+# Login as current user
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -212,6 +214,7 @@ def login():
     # else:
     return render_template("login.html")
 
+# Logout of session
 @app.route("/logout")
 def logout():
     """Log user out"""

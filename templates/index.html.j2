@@ -17,14 +17,6 @@
 <div class="chart-container" style="float:right; width: 20vw">
 <form action="/index" method="post">
     <div class="form-group">  
-    <b>Select habits to visualize:  
-    <select id="habit-choice" multiple="multiple" style="width: 10vw">
-                {% for i in range(habit_list|length) %}
-                <option>{{ habit_list[i][0] }}</option>
-                 {% endfor %}
-    </select>
-    <br>
-    <br>
     Select period of time:
     <select id="time_frame" style="width: 10vw">
                 <option>Last 30 Days</option>
@@ -57,9 +49,8 @@ let data = {{ data|safe }};
 var myChart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-    datasets: [
-    ]
+    labels: {{ dates }},//[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+    datasets: []
   },
 //   options: {
 //     title: {
@@ -95,13 +86,22 @@ for (let [key, value] of Object.entries(data)) {
     myChart.update();
 }
 
+myChart.data.datasets.push({
+    label: 'today',
+    borderColor: '#000000',
+    data: [{
+    x: 10,
+    y: 8
+}, {
+    x: 15,
+    y: 10
+}],
+    fill: false
+    });
+    myChart.update();
 
 
-// for multi select
 
-$(document).ready(function() {
-        $('#habit-choice').multiselect();
-});
 
 
 </script>
