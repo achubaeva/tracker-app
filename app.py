@@ -67,7 +67,7 @@ def new():
     if request.method == "POST":
         
         habit = request.form.get("habit")
-        habit_type = request.form.get("type")
+        habit_type = "binary"
 
 
         db.execute('INSERT INTO habitlist(user_id,habit,type) VALUES(?,?,?)', (session["user_id"], habit, habit_type))
@@ -76,21 +76,34 @@ def new():
 
     return render_template("new.html")
 
-@app.route('/delete')
+@app.route('/delete', methods=["GET", "POST"])
 @login_required
 def delete():
     connection = sqlite3.connect('database.db')
     db = connection.cursor()
+
+    # show list of current habits
+    habit_list = list(set(list(db.execute("SELECT habit from habitlist WHERE user_id = ?", (session["user_id"],)))))
     # db.execute('DELETE FROM habitlist WHERE user_id = 1')
     # db.execute('DELETE FROM habits WHERE user_id = 1')
-    connection.commit()
 
+    #connection.commit()
 
-    return render_template("delete.html")
+    if request.method == "POST":
+        habit = request.form.get("habit")
+        
+        db.execute("DELETE FROM habitlist WHERE user_id = ? AND habit = ?", (session["user_id"], habit))
 
-@app.route('/history')
+        connection.commit()
+        #connection.close()
+
+        return redirect("/delete")
+    else:
+        return render_template("delete.html", habit_list = habit_list)
+
+@app.route('/')
 @login_required
-def history():
+def index():
     connection = sqlite3.connect('database.db')
     db = connection.cursor()
     data_dict = {}
@@ -113,12 +126,7 @@ def history():
     #print("Data is", data)
 
 
-    return render_template("history.html.j2", data=json.dumps(data_dict))
-
-@app.route('/')
-@login_required
-def index():
-    return render_template("index.html")
+    return render_template("index.html.j2", data=json.dumps(data_dict), habit_list = habit_list)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

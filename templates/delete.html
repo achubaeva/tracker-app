@@ -1,9 +1,18 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Home
+    Delete
 {% endblock %}
 
 {% block main %}
-Hello
+<form action="/delete" method="post">
+    <div class="form-group">
+        <select name="habit" class="form-control">
+                {% for i in range(habit_list|length) %}
+                <option>{{ habit_list[i][0] }}</option>
+                 {% endfor %}
+        </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Delete</button>
+</form>
 {% endblock %}
