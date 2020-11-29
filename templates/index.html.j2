@@ -15,18 +15,21 @@
 </div>
 
 <div class="chart-container" style="float:right; width: 20vw">
-<form action="/index" method="post">
-    <div class="form-group">  
+<form action="/" method="post" >
+ 
     Select period of time:
-    <select id="time_frame" style="width: 10vw">
-                <option>Last 30 Days</option>
-                <option>Last Week</option>
+    <select name="days" style="width: 10vw" class="form-group">
+                <option value=30>Last 30 Days</option>
+                <option value=20>Last 20 Days</option>
+                <option value=10>Last 10 Days</option>
+                <option value=7>Last 7 Days</option>
+                <option value=5>Last 5 Days</option>
 
     </select>
 
 
-    </div>
-    <button class="btn btn-primary" type="submit" style="width: 10vw">Log</button>
+
+    <button class="btn btn-primary" type="submit" style="width: 10vw">View</button>
 </form>
 
 
@@ -85,20 +88,6 @@ for (let [key, value] of Object.entries(data)) {
     });
     myChart.update();
 }
-
-myChart.data.datasets.push({
-    label: 'today',
-    borderColor: '#000000',
-    data: [{
-    x: 10,
-    y: 8
-}, {
-    x: 15,
-    y: 10
-}],
-    fill: false
-    });
-    myChart.update();
 
 
 

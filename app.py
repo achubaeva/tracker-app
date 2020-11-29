@@ -8,7 +8,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
 from helpers import login_required
 from flask_session import Session
-from datetime import datetime
+from datetime import datetime, timedelta, date
+import pandas as pd
 import sqlite3
 
 TODAY = str(datetime.today().strftime('%Y-%m-%d'))
@@ -101,31 +102,49 @@ def delete():
         return render_template("delete.html", habit_list = habit_list)
 
 # Homepage - show dashboard
-@app.route('/')
+@app.route('/', methods=["GET", "POST"])
 @login_required
 def index():
     connection = sqlite3.connect('database.db')
     db = connection.cursor()
+
+    # Get time period
+    time=7
+    if request.form.get("days"):
+        time = int(request.form.get("days"))
+    #time_period = int(time[5:7])
+    print(time)
+    date_list = pd.date_range(end = TODAY, periods = time).to_pydatetime().tolist()
+    dates = [str(i.strftime('%Y-%m-%d')) for i in date_list]
+
     data_dict = {}
+
+    # List of all habits we have (set)
     habit_list = list(set(list(db.execute("SELECT habit from habitlist WHERE user_id = ?", (session["user_id"],)))))
+
+    # For every habit
     for h in habit_list:
-        # need data
-        data_list = list(db.execute("SELECT rating from habits WHERE user_id = ? AND habit = ?", (session["user_id"], h[0])))
-        
+        # Get rating and date
+        data_list = list(db.execute("SELECT rating, date from habits WHERE user_id = ? AND habit = ?", (session["user_id"], h[0])))
+        # Create temp list of dates for which ratings are collected
+        dates_temp = [i[1] for i in data_list]
+        #print(dates_temp)
+        # Iterate over dates list that determines x-axis; check if date is in dates_temp; if not, create 0 rating
+        for d in dates:
+            if d not in dates_temp:
+                data_list.insert(0, (None, d))
+
+        #print(data_list)
         if data_list != []:
             #print(h[0], [i[0] for i in data_list])
             #print(list(data_list[0]))
             data_dict[h[0]] = [i[0] for i in data_list]
-    #print(data_dict['Anna'])
-    
 
-    # dates
-    dates_set = list(set(list(db.execute("SELECT date from habits WHERE user_id = ?", (session["user_id"],)))))
     connection.commit()
     connection.close()
     #data = [1.0,2.0,3.0] 
     #print("Data is", data)
-    dates = [i[0] for i in dates_set]
+
 
     return render_template("index.html.j2", data=json.dumps(data_dict), habit_list=habit_list, dates=dates)
 
