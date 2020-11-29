@@ -78,15 +78,19 @@ options: {
 
 console.log(data);
 
+let colorList = ['#C0392B', '#2980B9', '#9B59B6', '#16A085', '#F1C40F', '#E67E22', '#707B7C', '#ff0000'];
+let j = 0;
+
 for (let [key, value] of Object.entries(data)) {
   console.log(`${key}: ${value}`);
   myChart.data.datasets.push({
     label: key,
-    borderColor: '#ff0000',
+    borderColor: colorList[j],
     data: value,
     fill: false
     });
     myChart.update();
+    j++;
 }
 
 

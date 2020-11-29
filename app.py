@@ -108,15 +108,15 @@ def index():
     connection = sqlite3.connect('database.db')
     db = connection.cursor()
 
-    # Get time period
-    time=7
+    # Get time period; default is 7 days
+    time = 7
     if request.form.get("days"):
         time = int(request.form.get("days"))
-    #time_period = int(time[5:7])
-    print(time)
+
     date_list = pd.date_range(end = TODAY, periods = time).to_pydatetime().tolist()
     dates = [str(i.strftime('%Y-%m-%d')) for i in date_list]
 
+    # Dictionary to hold habits' data; to be converted to json
     data_dict = {}
 
     # List of all habits we have (set)
@@ -128,13 +128,14 @@ def index():
         data_list = list(db.execute("SELECT rating, date from habits WHERE user_id = ? AND habit = ?", (session["user_id"], h[0])))
         # Create temp list of dates for which ratings are collected
         dates_temp = [i[1] for i in data_list]
-        #print(dates_temp)
+        # If today is not logged yet, add point at end
+        if TODAY not in dates_temp:
+            data_list.append((0,))
         # Iterate over dates list that determines x-axis; check if date is in dates_temp; if not, create 0 rating
         for d in dates:
             if d not in dates_temp:
                 data_list.insert(0, (None, d))
 
-        #print(data_list)
         if data_list != []:
             #print(h[0], [i[0] for i in data_list])
             #print(list(data_list[0]))
@@ -142,9 +143,6 @@ def index():
 
     connection.commit()
     connection.close()
-    #data = [1.0,2.0,3.0] 
-    #print("Data is", data)
-
 
     return render_template("index.html.j2", data=json.dumps(data_dict), habit_list=habit_list, dates=dates)
 
