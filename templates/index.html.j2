@@ -26,42 +26,23 @@
                 <option value=5>Last 5 Days</option>
 
     </select>
-
-
-
     <button class="btn btn-primary" type="submit" style="width: 10vw">View</button>
 </form>
-
-
-
 </div>
-
 
 
 <script>
 
-// labels = date; last 30 days in a list
-// need datasets in a list; will iterate over
-// need to pass through a variable that is a list of dictionaries
-
 var ctx = document.getElementById('myChart').getContext('2d');
-//data = JSON.parse({{ data | tojson }});
-//let data = JSON.parse({{ data | tojson }});
+
 let data = {{ data|safe }};
 
 var myChart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: {{ dates }},//[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+    labels: {{ dates }},
     datasets: []
   },
-//   options: {
-//     title: {
-//       display: true,
-//       text: 'World population per region (in millions)'
-//     }
-    
-//   }
 options: {
         scales: {
             yAxes: [{
@@ -73,10 +54,6 @@ options: {
         }
     }
 });
-
-
-
-console.log(data);
 
 let colorList = ['#C0392B', '#2980B9', '#9B59B6', '#16A085', '#F1C40F', '#E67E22', '#707B7C', '#ff0000'];
 let j = 0;

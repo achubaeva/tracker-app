@@ -16,17 +16,15 @@ TODAY = str(datetime.today().strftime('%Y-%m-%d'))
 print(TODAY)
 RECORD = False
 
-
-# add column to users that stores dictionary with habits and types
-
 # Create sqlite3 database
 import sqlite3
 db = sqlite3.connect('database.db')
-#db.execute('DROP TABLE habits')
-#db.execute('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT, hash TEXT)')
 
+# Creating tables
+#db.execute('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT, hash TEXT)')
 #db.execute('CREATE TABLE habits (habit_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, habit TEXT, rating INTEGER, date TEXT)')
 #db.execute('CREATE TABLE habitlist (habit_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, habit TEXT, type TEXT)')
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -164,12 +162,10 @@ def register():
         username=request.form.get("username")
 
         # Ensure username does not exist
-        # TO DO
         rows = db.execute("SELECT * FROM users WHERE username = ?", (username,) )
         print("Username exists!")
 
         # Ensure password was submitted
-        # TO DO
         if not request.form.get("password"):
             print("Password not provided")
 
@@ -184,6 +180,7 @@ def register():
         connection.commit()
         connection.close()
         return redirect("/")
+    
     else:
         return render_template("register.html")
 
@@ -220,18 +217,14 @@ def login():
               # Ensure username exists and password is correct
         if not check_password_hash(results[0][2], password):
             print("invalid username and/or password")
-    #     # Ensure username exists and password is correct
-    #     if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-    #         return apology("invalid username and/or password", 403)
 
-    #     # Remember which user has logged in
+        # Remember which user has logged in
         session["user_id"] = results[0][0]
 
-        #Redirect user to home page
+        # Redirect user to home page
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
-    # else:
     return render_template("login.html")
 
 # Logout of session
